@@ -44,12 +44,15 @@ const handlers = [
 const server = setupServer(...handlers);
 
 describe("<Home />", () => {
+  //Antes de todos os testes...
   beforeAll(() => {
     server.listen();
   });
 
+  //Depois de cada teste...
   afterEach(() => server.resetHandlers());
 
+  //Depois de todos os testes...
   afterAll(() => {
     server.close();
   });
@@ -58,12 +61,29 @@ describe("<Home />", () => {
     render(<Home />);
     const noMorePosts = screen.getByText("Não existem posts");
 
+    expect.assertions(3);
+
     //Como a função é assincrona, ela renderiza o
     //componente para depois executar a função useEffect e os
     //callbacks, enquanto isso, aparece o "Não existem posts"
     //Esse teste verifica se ele "some" depois que é
     //carregado
     await waitForElementToBeRemoved(noMorePosts);
-    //screen.debug();
+    screen.debug();
+
+    //Botão de busca
+    const search = screen.getByPlaceholderText(/Digite aqui sua busca/i);
+
+    expect(search).toBeInTheDocument();
+
+    //Imagens
+    const images = screen.getAllByRole("img", { name: /title/i });
+
+    expect(images).toHaveLength(3);
+
+    //Button
+    const button = screen.getByRole("button", { name: /Load more posts/i });
+
+    expect(button).toBeInTheDocument();
   });
 });
