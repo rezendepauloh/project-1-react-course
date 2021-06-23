@@ -2,7 +2,7 @@ import "./styles.css";
 import { useEffect, useState, useCallback } from "react";
 import { Posts } from "../../components/Posts";
 import { Button } from "../../components/Button";
-import { loadPosts } from "../../util/load-posts";
+import { loadPosts } from "../../util/load_posts";
 import { TextInput } from "../../components/TextInput";
 
 export const Home = () => {
