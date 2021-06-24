@@ -6,6 +6,7 @@ import {
   waitForElementToBeRemoved,
 } from "@testing-library/react";
 import { Home } from ".";
+import userEvent from "@testing-library/user-event";
 
 //Vamos usar o Mock Service Worker (msw) para
 //simular um server e para pegar as requisições
@@ -85,5 +86,89 @@ describe("<Home />", () => {
     const button = screen.getByRole("button", { name: /Load more posts/i });
 
     expect(button).toBeInTheDocument();
+  });
+
+  it("should search for posts", async () => {
+    render(<Home />);
+    const noMorePosts = screen.getByText("Não existem posts");
+
+    expect.assertions(16);
+
+    await waitForElementToBeRemoved(noMorePosts);
+    //screen.debug();
+
+    //Botão de busca
+    const search = screen.getByPlaceholderText(/Digite aqui sua busca/i);
+
+    //Esses estão na tela?
+    expect(
+      screen.getByRole("heading", { name: "1 - title1" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "2 - title2" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "3 - title3" })
+    ).toBeInTheDocument();
+
+    //Esse não está na tela?
+    expect(
+      screen.queryByRole("heading", { name: "4 - title4" })
+    ).not.toBeInTheDocument();
+
+    //Digitar no botão o título do 1
+    userEvent.type(search, "title1");
+
+    //Consultar de novo os expects
+    expect(
+      screen.getByRole("heading", { name: "1 - title1" })
+    ).toBeInTheDocument();
+
+    //Esses não estão na tela?
+    expect(
+      screen.queryByRole("heading", { name: "2 - title2" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "3 - title3" })
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("heading", { name: "4 - title4" })
+    ).not.toBeInTheDocument();
+
+    //Verifica se o H3 aparece na tela depois de digitar no input
+    expect(
+      screen.getByRole("heading", { name: "Search value: title1" })
+    ).toBeInTheDocument();
+
+    //Limpar a busca
+    userEvent.clear(search);
+
+    //Esses estão na tela?
+    expect(
+      screen.getByRole("heading", { name: "1 - title1" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "2 - title2" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "3 - title3" })
+    ).toBeInTheDocument();
+
+    //Digitar no botão algo que não exista
+    userEvent.type(search, "isso nao existe");
+
+    //Esses estão na tela?
+    expect(
+      screen.queryByRole("heading", { name: "1 - title1" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "2 - title2" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "3 - title3" })
+    ).not.toBeInTheDocument();
+
+    expect(screen.getByText("Não existem posts")).toBeInTheDocument();
   });
 });
